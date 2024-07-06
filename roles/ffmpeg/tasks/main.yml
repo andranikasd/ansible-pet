@@ -1,0 +1,21 @@
+---
+- name: Create application directory
+  file:
+    path: /opt/nginx-ffmpeg
+    state: directory
+
+- name: Create HTML directory
+  file:
+    path: /opt/nginx-ffmpeg/html
+    state: directory
+
+- name: Run FFmpeg container
+  docker_container:
+    name: ffmpeg
+    image: jrottenberg/ffmpeg:latest
+    state: started
+    restart_policy: always
+    command: >
+      -i http://webcam.mchcares.com/mjpg/video.mjpg -vf fps=10 /frames/index.jpg -y
+    volumes:
+      - /opt/nginx-ffmpeg/html:/frames
