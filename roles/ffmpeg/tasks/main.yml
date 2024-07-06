@@ -1,13 +1,19 @@
 ---
 - name: Create application directory
   file:
-    path: /opt/nginx-ffmpeg
+    path: /home/{{ ansible_user }}/nginx-ffmpeg
     state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0755'
 
 - name: Create HTML directory
   file:
-    path: /opt/nginx-ffmpeg/html
+    path: /home/{{ ansible_user }}/nginx-ffmpeg/html
     state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0755'
 
 - name: Run FFmpeg container
   docker_container:
@@ -16,6 +22,6 @@
     state: started
     restart_policy: always
     command: >
-      -i http://webcam.mchcares.com/mjpg/video.mjpg -vf fps=10 /frames/index.jpg -y
+      -i http://webcam.mchcares.com/mjpg/video.mjpg -vf fps=1 /frames/index.jpg -y
     volumes:
-      - /opt/nginx-ffmpeg/html:/frames
+      - /home/{{ ansible_user }}/nginx-ffmpeg/html:/frames

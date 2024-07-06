@@ -67,7 +67,7 @@ localhost ansible_connection=local
 Run the Ansible playbook to set up Nginx and FFmpeg on your target host.
 
 ```sh
-ansible-playbook -i inventory.ini site.yml --ask-become-pass
+ansible-playbook -i host.ini site.yml --ask-become-pass
 ```
 
 ### Step 4: Access the Live Stream

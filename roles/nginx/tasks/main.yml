@@ -1,18 +1,27 @@
 ---
 - name: Create application directory
   file:
-    path: /opt/nginx-ffmpeg
+    path: /home/{{ ansible_user }}/nginx-ffmpeg
     state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0755'
 
 - name: Create HTML directory
   file:
-    path: /opt/nginx-ffmpeg/html
+    path: /home/{{ ansible_user }}/nginx-ffmpeg/html
     state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0755'
 
 - name: Copy Nginx configuration file
   template:
     src: default.conf.j2
-    dest: /opt/nginx-ffmpeg/default.conf
+    dest: /home/{{ ansible_user }}/nginx-ffmpeg/default.conf
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0644'
 
 - name: Run Nginx container
   docker_container:
@@ -23,5 +32,5 @@
     ports:
       - "80:80"
     volumes:
-      - /opt/nginx-ffmpeg/default.conf:/etc/nginx/conf.d/default.conf
-      - /opt/nginx-ffmpeg/html:/usr/share/nginx/html
+      - /home/{{ ansible_user }}/nginx-ffmpeg/default.conf:/etc/nginx/conf.d/default.conf
+      - /home/{{ ansible_user }}/nginx-ffmpeg/html:/usr/share/nginx/html
