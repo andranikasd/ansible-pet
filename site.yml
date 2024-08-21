@@ -1,6 +1,8 @@
 ---
 - hosts: webserver
   become: yes
+  vars_files:
+    - configs/vars.yml
   roles:
     - nginx
     - ffmpeg

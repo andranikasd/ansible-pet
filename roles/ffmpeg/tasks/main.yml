@@ -1,7 +1,7 @@
 ---
 - name: Create application directory
   file:
-    path: /home/{{ ansible_user }}/nginx-ffmpeg
+    path: "{{ nginx_ffmpeg_base_path }}"
     state: directory
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
@@ -9,7 +9,7 @@
 
 - name: Create HTML directory
   file:
-    path: /home/{{ ansible_user }}/nginx-ffmpeg/html
+    path: "{{ nginx_ffmpeg_html_path }}"
     state: directory
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
@@ -17,11 +17,10 @@
 
 - name: Run FFmpeg container
   docker_container:
-    name: ffmpeg
-    image: jrottenberg/ffmpeg:latest
+    name: "{{ ffmpeg_container_name }}"
+    image: "{{ ffmpeg_image }}"
     state: started
     restart_policy: always
-    command: >
-      -i http://webcam.mchcares.com/mjpg/video.mjpg -vf fps=1 /frames/index.jpg -y
+    command: "{{ ffmpeg_command }}"
     volumes:
-      - /home/{{ ansible_user }}/nginx-ffmpeg/html:/frames
+      - "{{ nginx_ffmpeg_html_path }}:/frames"

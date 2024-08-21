@@ -9,7 +9,7 @@ This Ansible playbook sets up an Nginx web server and an FFmpeg stream processin
 The project structure is as follows:
 
 ```
-ansible_docker_setup/
+ansible-pet/
 ├── inventory.ini
 ├── site.yml
 └── roles/
@@ -42,8 +42,8 @@ ansible_docker_setup/
 ### Step 1: Clone the Repository
 
 ```sh
-git clone https://github.com/elhakoyan/web-stream.git
-cd ansible_docker_setup
+git clone https://github.com/andranikasd/ansible-pet
+cd ansible-pet
 ```
 
 ### Step 2: Update Inventory File
@@ -80,70 +80,81 @@ http://your_server_ip/
 
 The page will display the latest frame from the live stream.
 
-## Roles
 
-### Nginx Role
+## Configuration options 
 
-Sets up and runs the Nginx container.
+## FFmpeg & Nginx Container Setup Guide
 
-`roles/nginx/tasks/main.yml`:
+This guide provides a detailed explanation of the variables used for setting up FFmpeg and Nginx containers in an Ansible playbook. These variables are defined in `nginx_vars.yml` and are used to customize the deployment according to your environment.
 
-```yaml
----
-- name: Create application directory
-  file:
-    path: /opt/nginx-ffmpeg
-    state: directory
+### Variables Overview
 
-- name: Create HTML directory
-  file:
-    path: /opt/nginx-ffmpeg/html
-    state: directory
 
-- name: Copy Nginx configuration file
-  template:
-    src: default.conf.j2
-    dest: /opt/nginx-ffmpeg/default.conf
+- **`nginx_container_name`**
+  - **Description:** The name of the Nginx container.
+  - **Example:** `nginx-ffmpeg`
+  
+- **`nginx_image`**
+  - **Description:** The Docker image to use for the Nginx container.
+  - **Example:** `nginx:stable-alpine`
 
-- name: Run Nginx container
-  docker_container:
-    name: nginx
-    image: nginx:latest
-    state: started
-    restart_policy: always
-    ports:
-      - "80:80"
-    volumes:
-      - /opt/nginx-ffmpeg/default.conf:/etc/nginx/conf.d/default.conf
-      - /opt/nginx-ffmpeg/html:/usr/share/nginx/html
-```
+- **`nginx_config_path`**
+  - **Description:** The path to the Nginx configuration file on the host machine.
+  - **Example:** `/home/{{ ansible_user }}/nginx-ffmpeg/default.conf`
 
-### FFmpeg Role
+- **`nginx_html_path`**
+  - **Description:** The path to the HTML directory on the host machine that will be served by Nginx.
+  - **Example:** `/home/{{ ansible_user }}/nginx-ffmpeg/html`
 
-Sets up and runs the FFmpeg container to capture frames from the live stream.
+### FFmpeg Configuration Variables
 
-`roles/ffmpeg/tasks/main.yml`:
+- **`nginx_ffmpeg_base_path`**
+  - **Description:** The base directory for the Nginx and FFmpeg setup on the host machine.
+  - **Example:** `/home/{{ ansible_user }}/nginx-ffmpeg`
 
-```yaml
----
-- name: Create application directory
-  file:
-    path: /opt/nginx-ffmpeg
-    state: directory
+- **`nginx_ffmpeg_html_path`**
+  - **Description:** The specific path where FFmpeg will store captured frames, which will be served by Nginx.
+  - **Example:** `/home/{{ ansible_user }}/nginx-ffmpeg/html`
 
-- name: Create HTML directory
-  file:
-    path: /opt/nginx-ffmpeg/html
-    state: directory
+- **`ffmpeg_container_name`**
+  - **Description:** The name of the FFmpeg container.
+  - **Example:** `ffmpeg`
 
-- name: Run FFmpeg container
-  docker_container:
-    name: ffmpeg
-    image: jrottenberg/ffmpeg:latest
-    state: started
-    restart_policy: always
-    command: >
-      -i http://webcam.mchcares.com/mjpg/video.mjpg -vf fps=1 /frames/index.jpg -y
-    volumes:
-      - /opt/nginx-ffmpeg/html:/frames
-```
+- **`ffmpeg_image`**
+  - **Description:** The Docker image to use for the FFmpeg container.
+  - **Example:** `jrottenberg/ffmpeg:latest`
+
+- **`ffmpeg_command`**
+  - **Description:** The FFmpeg command to be executed by the container to capture frames from a video stream.
+  - **Example:** `-i http://webcam.mchcares.com/mjpg/video.mjpg -vf fps=1 /frames/index.jpg -y`
+
+### Nginx Port Configuration
+
+- **`nginx_ports`**
+  - **Description:** Defines the port mapping between the host and the Nginx container.
+  - **Example:** `["80:80"]`
+
+### How to Use These Variables
+
+1. **Create the Variables File**: 
+   - Create a `nginx_vars.yml` file in your Ansible project directory.
+   
+2. **Populate the Variables File**:
+   - Copy the variable definitions into the `nginx_vars.yml` file and customize them according to your environment.
+
+   Example `nginx_vars.yml`:
+   ```yaml
+   # nginx configuration variables
+   nginx_container_name: nginx-ffmpeg
+   nginx_image: nginx:stable-alpine
+   nginx_config_path: /home/{{ ansible_user }}/nginx-ffmpeg/default.conf
+   nginx_html_path: /home/{{ ansible_user }}/nginx-ffmpeg/html
+   nginx_ffmpeg_base_path: /home/{{ ansible_user }}/nginx-ffmpeg
+   nginx_ffmpeg_html_path: "{{ nginx_ffmpeg_base_path }}/html"
+   ffmpeg_container_name: ffmpeg
+   ffmpeg_image: jrottenberg/ffmpeg:latest
+   ffmpeg_command: >
+     -i http://webcam.mchcares.com/mjpg/video.mjpg -vf fps=1 /frames/index.jpg -y
+   nginx_ports:
+     - "80:80"
+    ```

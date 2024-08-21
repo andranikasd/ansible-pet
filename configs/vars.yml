@@ -1,0 +1,34 @@
+# nginx configuration variables
+
+# The name of the Nginx container.
+nginx_container_name: nginx-ffmpeg
+
+# The Docker image to use for the Nginx container.
+nginx_image: nginx:stable-alpine
+
+# The path to the Nginx configuration file on the host.
+nginx_config_path: /home/{{ ansible_user }}/nginx-ffmpeg/default.conf
+
+# The path to the HTML directory on the host that will be served by Nginx.
+nginx_html_path: /home/{{ ansible_user }}/nginx-ffmpeg/html
+
+# Base path for the Nginx and FFmpeg setup on the host.
+nginx_ffmpeg_base_path: /home/{{ ansible_user }}/nginx-ffmpeg
+
+# Path to the directory where FFmpeg will save frames, served by Nginx.
+nginx_ffmpeg_html_path: "{{ nginx_ffmpeg_base_path }}/html"
+
+# The name of the FFmpeg container.
+ffmpeg_container_name: ffmpeg
+
+# The Docker image to use for the FFmpeg container.
+ffmpeg_image: jrottenberg/ffmpeg:4-ubuntu
+
+# The FFmpeg command to capture frames from the video stream.
+ffmpeg_command: >
+  -i http://webcam.mchcares.com/mjpg/video.mjpg -vf fps=1 /frames/index.jpg -y
+
+# The port mapping for the Nginx container (host:container).
+nginx_ports:
+  - "80:80"
+
