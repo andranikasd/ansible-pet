@@ -10,17 +10,21 @@ The project structure is as follows:
 
 ```
 ansible-pet/
-├── inventory.ini
-├── site.yml
-└── roles/
-    ├── nginx/
-    │   ├── tasks/
-    │   │   └── main.yml
-    │   └── templates/
-    │       └── default.conf.j2
-    └── ffmpeg/
-        └── tasks/
-            └── main.yml
+├── configs
+│   └── vars.yml
+├── host.ini
+├── README.md
+├── requirements.txt
+├── roles
+│   ├── ffmpeg
+│   │   └── tasks
+│   │       └── main.yml
+│   └── nginx
+│       ├── tasks
+│       │   └── main.yml
+│       └── templates
+│           └── default.conf.j2
+└── site.yml
 ```
 
 - `inventory.ini`: Contains the inventory of the servers.
@@ -29,6 +33,7 @@ ansible-pet/
 - `roles/nginx/tasks/main.yml`: Tasks for setting up and running the Nginx container.
 - `roles/nginx/templates/default.conf.j2`: Nginx configuration template.
 - `roles/ffmpeg/tasks/main.yml`: Tasks for setting up and running the FFmpeg container.
+- `configs/vars.yml`: Variables configuration file (See description under Configuration options)
 
 ## Prerequisites
 
@@ -46,7 +51,14 @@ git clone https://github.com/andranikasd/ansible-pet
 cd ansible-pet
 ```
 
-### Step 2: Update Inventory File
+### Step 2: Setup python environment
+```sh
+python3 -m venv env
+source env/bin/activate
+pip install -r requirements.txt
+```
+
+### Step 3: Update Inventory File
 
 Edit the `inventory.ini` file to include your target host details.
 
@@ -62,7 +74,12 @@ For local setup, use `localhost` as the host:
 localhost ansible_connection=local
 ```
 
-### Step 3: Run the Playbook
+### Step 4: Copy you public ssh key to target host
+```sh
+ssh-copy-id {{your_user}}@{{your_server_ip}}
+```
+
+### Step 5: Run the Playbook
 
 Run the Ansible playbook to set up Nginx and FFmpeg on your target host.
 
@@ -70,7 +87,7 @@ Run the Ansible playbook to set up Nginx and FFmpeg on your target host.
 ansible-playbook -i host.ini site.yml --ask-become-pass
 ```
 
-### Step 4: Access the Live Stream
+### Step 5: Access the Live Stream
 
 Open a web browser and navigate to the public IP address of your target host:
 
@@ -80,12 +97,14 @@ http://your_server_ip/
 
 The page will display the latest frame from the live stream.
 
+### NOTE: 
+Additionally You can change some configuration e.x image versions for your specific needs in `configs/vars.yaml`
 
 ## Configuration options 
 
 ## FFmpeg & Nginx Container Setup Guide
 
-This guide provides a detailed explanation of the variables used for setting up FFmpeg and Nginx containers in an Ansible playbook. These variables are defined in `nginx_vars.yml` and are used to customize the deployment according to your environment.
+This guide provides a detailed explanation of the variables used for setting up FFmpeg and Nginx containers in an Ansible playbook. These variables are defined in `configs/vars.yml` and are used to customize the deployment according to your environment.
 
 ### Variables Overview
 
@@ -140,9 +159,9 @@ This guide provides a detailed explanation of the variables used for setting up 
    - Create a `nginx_vars.yml` file in your Ansible project directory.
    
 2. **Populate the Variables File**:
-   - Copy the variable definitions into the `nginx_vars.yml` file and customize them according to your environment.
+   - Copy the variable definitions into the `configs/vars.yml` file and customize them according to your environment.
 
-   Example `nginx_vars.yml`:
+   Example `configs/vars.yml`:
    ```yaml
    # nginx configuration variables
    nginx_container_name: nginx-ffmpeg
