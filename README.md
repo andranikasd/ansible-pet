@@ -108,50 +108,29 @@ This guide provides a detailed explanation of the variables used for setting up 
 
 ### Variables Overview
 
-
-- **`nginx_container_name`**
-  - **Description:** The name of the Nginx container.
-  - **Example:** `nginx-ffmpeg`
-  
-- **`nginx_image`**
-  - **Description:** The Docker image to use for the Nginx container.
-  - **Example:** `nginx:stable-alpine`
-
-- **`nginx_config_path`**
-  - **Description:** The path to the Nginx configuration file on the host machine.
-  - **Example:** `/home/{{ ansible_user }}/nginx-ffmpeg/default.conf`
-
-- **`nginx_html_path`**
-  - **Description:** The path to the HTML directory on the host machine that will be served by Nginx.
-  - **Example:** `/home/{{ ansible_user }}/nginx-ffmpeg/html`
+| Variable Name             | Description                                                                                 | Example                                              |
+|---------------------------|---------------------------------------------------------------------------------------------|------------------------------------------------------|
+| **`nginx_container_name`** | The name of the Nginx container.                                                            | `nginx-ffmpeg`                                       |
+| **`nginx_image`**          | The Docker image to use for the Nginx container.                                            | `nginx:stable-alpine`                                |
+| **`nginx_config_path`**    | The path to the Nginx configuration file on the host machine.                               | `/home/{{ ansible_user }}/nginx-ffmpeg/default.conf`  |
+| **`nginx_html_path`**      | The path to the HTML directory on the host machine that will be served by Nginx.            | `/home/{{ ansible_user }}/nginx-ffmpeg/html`         |
 
 ### FFmpeg Configuration Variables
 
-- **`nginx_ffmpeg_base_path`**
-  - **Description:** The base directory for the Nginx and FFmpeg setup on the host machine.
-  - **Example:** `/home/{{ ansible_user }}/nginx-ffmpeg`
-
-- **`nginx_ffmpeg_html_path`**
-  - **Description:** The specific path where FFmpeg will store captured frames, which will be served by Nginx.
-  - **Example:** `/home/{{ ansible_user }}/nginx-ffmpeg/html`
-
-- **`ffmpeg_container_name`**
-  - **Description:** The name of the FFmpeg container.
-  - **Example:** `ffmpeg`
-
-- **`ffmpeg_image`**
-  - **Description:** The Docker image to use for the FFmpeg container.
-  - **Example:** `jrottenberg/ffmpeg:latest`
-
-- **`ffmpeg_command`**
-  - **Description:** The FFmpeg command to be executed by the container to capture frames from a video stream.
-  - **Example:** `-i http://webcam.mchcares.com/mjpg/video.mjpg -vf fps=1 /frames/index.jpg -y`
+| Variable Name               | Description                                                                             | Example                                                |
+|-----------------------------|-----------------------------------------------------------------------------------------|--------------------------------------------------------|
+| **`nginx_ffmpeg_base_path`** | The base directory for the Nginx and FFmpeg setup on the host machine.                  | `/home/{{ ansible_user }}/nginx-ffmpeg`                |
+| **`nginx_ffmpeg_html_path`** | The specific path where FFmpeg will store captured frames, which will be served by Nginx.| `/home/{{ ansible_user }}/nginx-ffmpeg/html`           |
+| **`ffmpeg_container_name`**  | The name of the FFmpeg container.                                                       | `ffmpeg`                                               |
+| **`ffmpeg_image`**           | The Docker image to use for the FFmpeg container.                                       | `jrottenberg/ffmpeg:latest`                            |
+| **`ffmpeg_command`**         | The FFmpeg command to be executed by the container to capture frames from a video stream.| `-i http://webcam.mchcares.com/mjpg/video.mjpg -vf fps=1 /frames/index.jpg -y` |
 
 ### Nginx Port Configuration
 
-- **`nginx_ports`**
-  - **Description:** Defines the port mapping between the host and the Nginx container.
-  - **Example:** `["80:80"]`
+| Variable Name      | Description                                                          | Example  |
+|--------------------|----------------------------------------------------------------------|----------|
+| **`nginx_ports`**  | Defines the port mapping between the host and the Nginx container.    | `["80:80"]` |
+`
 
 ### How to Use These Variables
 
