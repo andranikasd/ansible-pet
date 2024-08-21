@@ -84,7 +84,7 @@ ssh-copy-id {{your_user}}@{{your_server_ip}}
 Run the Ansible playbook to set up Nginx and FFmpeg on your target host.
 
 ```sh
-ansible-playbook -i host.ini site.yml --ask-become-pass
+ansible-playbook -i host.ini site.yml 
 ```
 
 ### Step 5: Access the Live Stream
@@ -160,5 +160,5 @@ This guide provides a detailed explanation of the variables used for setting up 
 
 To backup your target server to default and remove all data run 
 ```sh
-ansible-playbook -i host.ini server_down.yml --ask-become-pass
+ansible-playbook -i host.ini server_down.yml
 ```
