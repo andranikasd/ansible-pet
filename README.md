@@ -134,7 +134,7 @@ This guide provides a detailed explanation of the variables used for setting up 
 ### How to Use These Variables
 
 1. **Create the Variables File**: 
-   - Create a `nginx_vars.yml` file in your Ansible project directory.
+   - Create a `configs/vars.yml` file in your Ansible project directory.
    
 2. **Populate the Variables File**:
    - Copy the variable definitions into the `configs/vars.yml` file and customize them according to your environment.
