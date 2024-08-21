@@ -4,36 +4,55 @@
 
 This Ansible playbook sets up an Nginx web server and an FFmpeg stream processing server on a Linux host using Docker. The Nginx server serves the latest frame from a live stream as the root index.
 
-## Structure
+## Project Structure
 
 The project structure is as follows:
 
 ```
 ansible-pet/
-├── configs
-│   └── vars.yml
-├── host.ini
+├── ansible.cfg
+├── inventory
+│   ├── default
+│   │   ├── configs
+│   │   │   └── vars.yml (Optional)
+│   │   ├── group_vars
+│   │   │   └── all.yml
+│   │   └── host.ini
+│   └── production
+│       ├── configs
+│       │   └── vars.yml (Optional)
+│       ├── group_vars
+│       │   └── all.yml
+│       └── host.ini
 ├── README.md
 ├── requirements.txt
 ├── roles
-│   ├── ffmpeg
-│   │   └── tasks
-│   │       └── main.yml
-│   └── nginx
-│       ├── tasks
-│       │   └── main.yml
-│       └── templates
-│           └── default.conf.j2
+│   ├── ffmpeg
+│   │   └── tasks
+│   │       └── main.yml
+│   └── nginx
+│       ├── tasks
+│       │   └── main.yml
+│       └── templates
+│           └── default.conf.j2
+├── server_down.yml
 └── site.yml
 ```
 
-- `inventory.ini`: Contains the inventory of the servers.
-- `site.yml`: The main playbook that includes all roles.
+- `ansible.cfg`: Configuration file for Ansible, specifying default behavior such as inventory location and privilege escalation.
+- `inventory/`: Directory containing inventory files and configuration for different environments.
+  - `default/`: The default environment setup.
+    - `group_vars/all.yml`: Variables applied to all hosts in the default environment.
+    - `host.ini`: The inventory file listing the hosts for the default environment.
+  - `production/`: The production environment setup.
+    - `group_vars/all.yml`: Variables applied to all hosts in the production environment.
+    - `host.ini`: The inventory file listing the hosts for the production environment.
 - `roles/`: Directory containing the roles for Nginx and FFmpeg.
-- `roles/nginx/tasks/main.yml`: Tasks for setting up and running the Nginx container.
-- `roles/nginx/templates/default.conf.j2`: Nginx configuration template.
-- `roles/ffmpeg/tasks/main.yml`: Tasks for setting up and running the FFmpeg container.
-- `configs/vars.yml`: Variables configuration file (See description under Configuration options)
+  - `roles/nginx/tasks/main.yml`: Tasks for setting up and running the Nginx container.
+  - `roles/nginx/templates/default.conf.j2`: Nginx configuration template.
+  - `roles/ffmpeg/tasks/main.yml`: Tasks for setting up and running the FFmpeg container.
+- `server_down.yml`: Playbook to tear down the setup and remove all configurations and containers.
+- `site.yml`: The main playbook that includes all roles and applies the configurations.
 
 ## Prerequisites
 
@@ -51,43 +70,81 @@ git clone https://github.com/andranikasd/ansible-pet
 cd ansible-pet
 ```
 
-### Step 2: Setup python environment
+### Step 2: Set Up the Python Environment
 ```sh
 python3 -m venv env
 source env/bin/activate
 pip install -r requirements.txt
 ```
 
-### Step 3: Update Inventory File
+### Step 3: Configure Your Inventory
 
-Edit the `inventory.ini` file to include your target host details.
+You can set up different environments by creating custom inventory directories inside the `inventory/` folder. Each environment should have its own `group_vars/all.yml` file for environment-specific variables and a corresponding `host.ini` file.
+
+Example for setting up a production environment:
 
 ```
+inventory/
+├── production
+│   ├── group_vars
+│   │   └── all.yml
+│   └── host.ini
+```
+
+- **`host.ini`**: Contains the IP addresses or hostnames of the servers for the environment. Example:
+
+```ini
 [webservers]
-your_server_ip ansible_user=your_user
+prod_server_ip ansible_user=your_user
 ```
 
-For local setup, use `localhost` as the host:
+- **`group_vars/all.yml`**: Environment-specific variables that apply to all hosts in this environment.
 
-```
-[webservers]
-localhost ansible_connection=local
+Example `all.yml`:
+
+```yaml
+# Nginx configuration variables
+nginx_container_name: nginx-ffmpeg-prod
+nginx_image: nginx:stable-alpine
+nginx_config_path: /home/{{ ansible_user }}/nginx-ffmpeg-prod/default.conf
+nginx_html_path: /home/{{ ansible_user }}/nginx-ffmpeg-prod/html
+
+# FFmpeg configuration variables
+ffmpeg_container_name: ffmpeg-prod
+ffmpeg_image: jrottenberg/ffmpeg:latest
+ffmpeg_command: >
+  -i http://webcam.mchcares.com/mjpg/video.mjpg -vf fps=1 /frames/index.jpg -y
+
+# Port configuration
+nginx_ports:
+  - "80:80"
 ```
 
-### Step 4: Copy you public ssh key to target host
+### Step 4: Update Your SSH Access
+
+Make sure your public SSH key is copied to the target hosts:
+
 ```sh
 ssh-copy-id {{your_user}}@{{your_server_ip}}
 ```
 
 ### Step 5: Run the Playbook
 
-Run the Ansible playbook to set up Nginx and FFmpeg on your target host.
+Run the Ansible playbook to set up Nginx and FFmpeg on your target host. Specify the inventory file for your environment:
+
+For the default environment:
 
 ```sh
-ansible-playbook -i host.ini site.yml 
+ansible-playbook -i inventory/default/host.ini site.yml 
 ```
 
-### Step 5: Access the Live Stream
+For a custom environment like production:
+
+```sh
+ansible-playbook -i inventory/production/host.ini site.yml 
+```
+
+### Step 6: Access the Live Stream
 
 Open a web browser and navigate to the public IP address of your target host:
 
@@ -97,20 +154,25 @@ http://your_server_ip/
 
 The page will display the latest frame from the live stream.
 
-### NOTE: 
-Additionally You can change some configuration e.x image versions for your specific needs in `configs/vars.yaml`
+### Step 7: Tearing Down the Setup
 
-## Configuration options 
+To remove all the running instances and configurations from the target host, run the `server_down.yml` playbook:
 
-## FFmpeg & Nginx Container Setup Guide
+```sh
+ansible-playbook -i inventory/production/host.ini server_down.yml
+```
 
-This guide provides a detailed explanation of the variables used for setting up FFmpeg and Nginx containers in an Ansible playbook. These variables are defined in `configs/vars.yml` and are used to customize the deployment according to your environment.
+## Configuration Options 
 
-### Variables Overview
+### FFmpeg & Nginx Container Setup Guide
+
+This guide provides a detailed explanation of the variables used for setting up FFmpeg and Nginx containers in an Ansible playbook. These variables are defined in the `group_vars/all.yml` file for each environment and are used to customize the deployment.
+
+#### Variables Overview
 
 | Variable Name             | Description                                                                                 | Example                                              |
 |---------------------------|---------------------------------------------------------------------------------------------|------------------------------------------------------|
-| **`nginx_container_name`** | The name of the Nginx container.                                                            | `nginx-ffmpeg`                                       |
+| **`nginx_container_name`** | The name of the Nginx container.                                                            | `nginx-ffmpeg-prod`                                  |
 | **`nginx_image`**          | The Docker image to use for the Nginx container.                                            | `nginx:stable-alpine`                                |
 | **`nginx_config_path`**    | The path to the Nginx configuration file on the host machine.                               | `/home/{{ ansible_user }}/nginx-ffmpeg/default.conf`  |
 | **`nginx_html_path`**      | The path to the HTML directory on the host machine that will be served by Nginx.            | `/home/{{ ansible_user }}/nginx-ffmpeg/html`         |
@@ -121,7 +183,7 @@ This guide provides a detailed explanation of the variables used for setting up 
 |-----------------------------|-----------------------------------------------------------------------------------------|--------------------------------------------------------|
 | **`nginx_ffmpeg_base_path`** | The base directory for the Nginx and FFmpeg setup on the host machine.                  | `/home/{{ ansible_user }}/nginx-ffmpeg`                |
 | **`nginx_ffmpeg_html_path`** | The specific path where FFmpeg will store captured frames, which will be served by Nginx.| `/home/{{ ansible_user }}/nginx-ffmpeg/html`           |
-| **`ffmpeg_container_name`**  | The name of the FFmpeg container.                                                       | `ffmpeg`                                               |
+| **`ffmpeg_container_name`**  | The name of the FFmpeg container.                                                       | `ffmpeg-prod`                                          |
 | **`ffmpeg_image`**           | The Docker image to use for the FFmpeg container.                                       | `jrottenberg/ffmpeg:latest`                            |
 | **`ffmpeg_command`**         | The FFmpeg command to be executed by the container to capture frames from a video stream.| `-i http://webcam.mchcares.com/mjpg/video.mjpg -vf fps=1 /frames/index.jpg -y` |
 
@@ -134,31 +196,20 @@ This guide provides a detailed explanation of the variables used for setting up 
 ### How to Use These Variables
 
 1. **Create the Variables File**: 
-   - Create a `configs/vars.yml` file in your Ansible project directory.
-   
-2. **Populate the Variables File**:
-   - Copy the variable definitions into the `configs/vars.yml` file and customize them according to your environment.
+   - Copy the `group_vars/all.yml` file from `inventory/default/group_vars/` and modify it according to your environment-specific needs.
 
-   Example `configs/vars.yml`:
-   ```yaml
-   # nginx configuration variables
-   nginx_container_name: nginx-ffmpeg
-   nginx_image: nginx:stable-alpine
-   nginx_config_path: /home/{{ ansible_user }}/nginx-ffmpeg/default.conf
-   nginx_html_path: /home/{{ ansible_user }}/nginx-ffmpeg/html
-   nginx_ffmpeg_base_path: /home/{{ ansible_user }}/nginx-ffmpeg
-   nginx_ffmpeg_html_path: "{{ nginx_ffmpeg_base_path }}/html"
-   ffmpeg_container_name: ffmpeg
-   ffmpeg_image: jrottenberg/ffmpeg:latest
-   ffmpeg_command: >
-     -i http://webcam.mchcares.com/mjpg/video.mjpg -vf fps=1 /frames/index.jpg -y
-   nginx_ports:
-     - "80:80"
-    ```
+2. **Update Inventory File**:
+   - Ensure your `host.ini` is correctly set up to point to your target hosts for each environment.
 
-## Remove running instances 
+3. **Run Playbook with the Specified Inventory**:
+   - Use the appropriate inventory path when running your playbooks to target the correct environment.
 
-To backup your target server to default and remove all data run 
+## Removing Running Instances
+
+To reset your target server to its default state and remove all configurations and containers, run the following command:
+
 ```sh
-ansible-playbook -i host.ini server_down.yml
+ansible-playbook -i inventory/production/host.ini server_down.yml
 ```
+
+This will stop and remove all Docker containers and delete related directories and files as configured in your playbook.
