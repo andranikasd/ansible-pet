@@ -155,3 +155,10 @@ This guide provides a detailed explanation of the variables used for setting up 
    nginx_ports:
      - "80:80"
     ```
+
+## Remove running instances 
+
+To backup your target server to default and remove all data run 
+```sh
+ansible-playbook -i host.ini server_down.yml --ask-become-pass
+```

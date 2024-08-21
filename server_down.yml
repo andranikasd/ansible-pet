@@ -1,0 +1,36 @@
+---
+- hosts: webserver
+  become: yes
+  vars_files:
+    - configs/vars.yml
+
+  tasks:
+    - name: Stop and remove Nginx container
+      docker_container:
+        name: "{{ nginx_container_name }}"
+        state: absent
+
+    - name: Stop and remove FFmpeg container
+      docker_container:
+        name: "{{ ffmpeg_container_name }}"
+        state: absent
+
+    - name: Remove Nginx configuration file
+      file:
+        path: "{{ nginx_config_path }}"
+        state: absent
+
+    - name: Remove HTML directory used by Nginx
+      file:
+        path: "{{ nginx_html_path }}"
+        state: absent
+
+    - name: Remove application directory for Nginx
+      file:
+        path: "/home/{{ ansible_user }}/nginx-ffmpeg"
+        state: absent
+
+    - name: Remove FFmpeg application directory
+      file:
+        path: "{{ nginx_ffmpeg_base_path }}"
+        state: absent
