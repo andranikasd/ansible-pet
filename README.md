@@ -130,7 +130,6 @@ This guide provides a detailed explanation of the variables used for setting up 
 | Variable Name      | Description                                                          | Example  |
 |--------------------|----------------------------------------------------------------------|----------|
 | **`nginx_ports`**  | Defines the port mapping between the host and the Nginx container.    | `["80:80"]` |
-`
 
 ### How to Use These Variables
 
